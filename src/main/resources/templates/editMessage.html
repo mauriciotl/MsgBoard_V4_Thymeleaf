@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <title>Edit Message</title>
+</head>
+<body>
+<h1>Edit Message</h1>
+
+<form th:action="@{/messages/update}" th:object="${message}" method="post">
+    <input type="hidden" th:field="*{messageId}" />
+    <input type="hidden" th:field="*{userId}" />
+
+    <label>Message:</label>
+    <textarea th:field="*{content}" required></textarea>
+    <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+
+    <button type="submit">Update</button>
+</form>
+
+<a href="/messages">Back to Messages</a>
+</body>
+</html>

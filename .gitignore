@@ -1,0 +1,57 @@
+# Maven Build Artifacts
+target/
+*.jar
+*.war
+*.ear
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.log
+
+# Logs (Common in Spring Boot)
+*.log
+logs/
+
+# Dependency and Build Files
+*.class
+*.tmp
+dependency-reduced-pom.xml
+
+# Spring Boot Specific
+spring.log
+*.h2.db
+*.mv.db
+application-local.properties
+application-dev.properties
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Eclipse/STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+# VS Code
+.vscode/
+
+# Documentation (if not versioned)
+/HELP.md

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+  <title>Message Board</title>
+</head>
+<body>
+<h1>Message Board</h1>
+
+<form th:action="@{/messages/add}" th:object="${message}" method="post">
+  <label>User ID:</label>
+  <input type="number" th:field="*{userId}" min="0" required />
+  <div th:if="${#fields.hasErrors('userId')}" th:errors="*{userId}"></div>
+
+  <label>Message:</label>
+  <textarea th:field="*{content}" required></textarea>
+  <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+
+  <button type="submit">Add Message</button>
+</form>
+
+<h2>Messages</h2>
+<div th:each="msg : ${messages}">
+  <p>
+    <strong>User:</strong> <span th:text="${msg.userId}"></span> <br>
+    <strong>Message:</strong> <span th:text="${msg.content}"></span> <br>
+    <strong>Date:</strong> <span th:text="${msg.creationDate}"></span>
+  </p>
+  <a th:href="@{/messages/edit/{id}(id=${msg.messageId})}">Edit</a>
+  <a th:href="@{/messages/delete/{id}(id=${msg.messageId})}" onclick="return confirm('Are you sure?');">Delete</a>
+  <hr>
+</div>
+</body>
+</html>

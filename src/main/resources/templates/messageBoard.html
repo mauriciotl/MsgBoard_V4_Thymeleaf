@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Message Board</title>
+
+  <link rel="stylesheet" th:href="@{/styles.css}"/>
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+  <script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+
+</head>
+
+<body>
+<div class="container">
+  <h1 class="text-center mb-4">Message Board</h1>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Add a New Message</h5>
+      <form th:action="@{/messages/add}" th:object="${message}" method="post">
+        <div class="mb-3">
+          <label class="form-label">User ID:</label>
+          <input type="number" class="form-control" th:field="*{userId}" min="1" required placeholder="Enter your User ID">
+          <div class="text-danger small" th:if="${#fields.hasErrors('userId')}" th:errors="*{userId}"></div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Message:</label>
+          <textarea class="form-control" th:field="*{content}" required placeholder="Write your message"></textarea>
+          <div class="text-danger small" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Add Message</button>
+      </form>
+    </div>
+  </div>
+
+  <h2 class="text-center mt-4">Messages</h2>
+
+  <div th:each="msg : ${messages}" class="card">
+    <div class="card-body">
+      <h5 class="card-title">User: <span th:text="${msg.userId}"></span></h5>
+      <p class="card-text"><strong>Message:</strong> <span th:text="${msg.content}"></span></p>
+      <p class="text-muted"><strong>Date:</strong> <span th:text="${msg.creationDate}"></span></p>
+      <a th:href="@{/messages/edit/{id}(id=${msg.messageId})}" class="btn btn-sm btn-warning">Edit</a>
+      <a th:href="@{/messages/delete/{id}(id=${msg.messageId})}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
