@@ -4,6 +4,22 @@
 
 <head>
     <title>Edit Message</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        #historyTable {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        #historyTable th, #historyTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #historyTable th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
 <h1>Edit Message</h1>
@@ -19,6 +35,73 @@
     <button type="submit">Update</button>
 </form>
 
-<a href="/messages">Back to Messages</a>
+
+<br/>
+<!-- Button to show history -->
+<button id="showHistoryBtn">Show History</button>
+
+<!-- Container for history messages -->
+<div id="historyContainer">
+    <table id="historyTable" style="display: none;">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Content</th>
+            <th>Creation Date</th>
+            <th>Update Date</th>
+        </tr>
+        </thead>
+        <tbody id="historyTableBody"></tbody>
+    </table>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function() {
+        const contextPath = /*[[${#httpServletRequest.contextPath}]]*/ ''; // Get context path from Thymeleaf
+
+        $('#showHistoryBtn').click(function() {
+            // Get messageId from the hidden field
+            const messageId = $('#messageId').val();
+            const url = contextPath + '/history/messages/' + messageId;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(data) {
+                    const tableBody = $('#historyTableBody');
+                    tableBody.empty(); // Clear existing rows
+
+                    if (data && data.length > 0) {
+                        $.each(data, function(index, message) {
+                            const row = '<tr>' +
+                                '<td>' + message.historyMessageId + '</td>' +
+                                '<td>' + message.content + '</td>' +
+                                '<td>' + message.historyCreationDate + '</td>' +
+                                '<td>' + message.updateDate + '</td>' +
+                                '</tr>';
+                            tableBody.append(row);
+                        });
+                        $('#historyTable').show();
+                    } else {
+                        tableBody.append('<tr><td colspan="4">No history found for this message</td></tr>');
+                        $('#historyTable').show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    const tableBody = $('#historyTableBody');
+                    tableBody.empty().append(
+                        '<tr><td colspan="4">Error loading history: ' + error + '</td></tr>'
+                    );
+                    $('#historyTable').show();
+                }
+            });
+        });
+    });
+    /*]]>*/
+</script>
+<br/>
+<a th:href="@{/messages}">Back to Messages</a>
+
 </body>
 </html>
