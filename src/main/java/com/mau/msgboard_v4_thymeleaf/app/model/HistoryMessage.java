@@ -8,13 +8,16 @@ public class HistoryMessage {
     private Date historyCreationDate;
     private Date updateDate;
 
-    // Constructor with all fields
-    public HistoryMessage(int historyMessageId, int messageId, String content, Date historyCreationDate, Date updateDate) {
-        this.historyMessageId = historyMessageId;
+    // Constructor: just four fields.
+    public HistoryMessage(int messageId, String content, Date historyCreationDate, Date updateDate) {
         this.messageId = messageId;
         this.content = content;
         this.historyCreationDate = historyCreationDate;
         this.updateDate = updateDate;
+    }
+
+    public HistoryMessage(){
+        //Empty constructor.
     }
 
     // Getters and Setters (Existing code remains here)
