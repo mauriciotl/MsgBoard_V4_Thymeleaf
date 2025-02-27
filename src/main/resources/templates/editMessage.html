@@ -4,22 +4,7 @@
 
 <head>
     <title>Edit Message</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        #historyTable {
-            margin-top: 20px;
-            border-collapse: collapse;
-            width: 100%;
-        }
-        #historyTable th, #historyTable td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        #historyTable th {
-            background-color: #f2f2f2;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/stylesHistoryMessage.css}"/>
 </head>
 <body>
 <h1>Edit Message</h1>
@@ -35,10 +20,9 @@
     <button type="submit">Update</button>
 </form>
 
-
 <br/>
 <!-- Button to show history -->
-<button id="showHistoryBtn">Show History</button>
+<button id="showHistoryBtn">Show History (No JQuery)</button>
 
 <!-- Container for history messages -->
 <div id="historyContainer">
@@ -57,45 +41,65 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    $(document).ready(function() {
-        const contextPath = /*[[${#httpServletRequest.contextPath}]]*/ ''; // Get context path from Thymeleaf
+    // Get context path from Thymeleaf
+    const contextPath = /*[[${#httpServletRequest.contextPath}]]*/ '';
 
-        $('#showHistoryBtn').click(function() {
-            // Get messageId from the hidden field
-            const messageId = $('#messageId').val();
+    // Wait for the page to load
+    document.addEventListener('DOMContentLoaded', function() {
+        const showHistoryBtn = document.getElementById('showHistoryBtn');
+        const historyTable = document.getElementById('historyTable');
+        const historyTableBody = document.getElementById('historyTableBody');
+
+        // Add click event to the button
+        showHistoryBtn.addEventListener('click', function() {
+            // Get messageId from the hidden input field
+            const messageId = document.getElementById('messageId').value;
             const url = contextPath + '/history/messages/' + messageId;
 
-            $.ajax({
-                url: url,
-                type: 'GET',
-                success: function(data) {
-                    const tableBody = $('#historyTableBody');
-                    tableBody.empty(); // Clear existing rows
-
-                    if (data && data.length > 0) {
-                        $.each(data, function(index, message) {
-                            const row = '<tr>' +
-                                '<td>' + message.historyMessageId + '</td>' +
-                                '<td>' + message.content + '</td>' +
-                                '<td>' + message.historyCreationDate + '</td>' +
-                                '<td>' + message.updateDate + '</td>' +
-                                '</tr>';
-                            tableBody.append(row);
-                        });
-                        $('#historyTable').show();
-                    } else {
-                        tableBody.append('<tr><td colspan="4">No history found for this message</td></tr>');
-                        $('#historyTable').show();
+            // Make an AJAX request using fetch
+            fetch(url, {
+                method: 'GET'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
-                },
-                error: function(xhr, status, error) {
-                    const tableBody = $('#historyTableBody');
-                    tableBody.empty().append(
-                        '<tr><td colspan="4">Error loading history: ' + error + '</td></tr>'
-                    );
-                    $('#historyTable').show();
-                }
-            });
+                    return response.json(); // Parse the JSON response
+                })
+                .then(data => {
+                    // Clear the table body
+                    historyTableBody.innerHTML = '';
+
+                    // Check if there’s data to display
+                    if (data && data.length > 0) {
+                        // Loop through the data and create table rows
+                        data.forEach(message => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                            <td>${message.historyMessageId}</td>
+                            <td>${message.content}</td>
+                            <td>${message.historyCreationDate}</td>
+                            <td>${message.updateDate}</td>
+                        `;
+                            historyTableBody.appendChild(row);
+                        });
+                    } else {
+                        // Show a "no history" message if the array is empty
+                        const row = document.createElement('tr');
+                        row.innerHTML = '<td colspan="4">No history found for this message</td>';
+                        historyTableBody.appendChild(row);
+                    }
+                    // Show the table
+                    historyTable.style.display = 'table';
+                })
+                .catch(error => {
+                    // Handle errors (e.g., network issues or server errors)
+                    historyTableBody.innerHTML = '';
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="4">Error loading history: ${error.message}</td>`;
+                    historyTableBody.appendChild(row);
+                    historyTable.style.display = 'table';
+                });
         });
     });
     /*]]>*/
