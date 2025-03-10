@@ -6,11 +6,16 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class UserRepositoryMysql implements UserRepository {
@@ -44,16 +49,20 @@ public class UserRepositoryMysql implements UserRepository {
     public User createUser(User user) {
         logger.info("Attempting to create user with username: {}", user.getUsername());
         try {
-            jdbcTemplate.update(INSERT_USER,
-                    user.getUserId(),
-                    user.getUsername(),
-                    user.getPassword()
-            );
-            logger.info("Successfully created user with username: {}", user.getUsername());
-            return user;
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(
+                        INSERT_USER, Statement.RETURN_GENERATED_KEYS);
+                ps.setInt(1, user.getUserId()); // Will be ignored if auto-increment
+                ps.setString(2, user.getUsername());
+                ps.setString(3, user.getPassword());
+                return ps;
+            }, keyHolder);
+            int generatedId = Objects.requireNonNull(keyHolder.getKey()).intValue();
+            logger.info("Successfully created user with username: {} and ID: {}", user.getUsername(), generatedId);
+            return new User(generatedId, user.getUsername(), user.getPassword());
         } catch (Exception e) {
-            logger.error("Error creating user with username: {}. Error: {}",
-                    user.getUsername(), e.getMessage());
+            logger.error("Error creating user with username: {}. Error: {}", user.getUsername(), e.getMessage());
             throw new RuntimeException("Failed to create user", e);
         }
     }
