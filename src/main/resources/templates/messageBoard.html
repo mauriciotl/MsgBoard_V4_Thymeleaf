@@ -38,6 +38,14 @@
     </div>
   </div>
 
+  <!-- Logout form -->
+  <form th:action="@{/logout}" method="post">
+    <input type="submit" value="Log Off">
+  </form>
+
+  <!-- Optional: Link back to home -->
+  <p><a th:href="@{/}">Back to Home</a></p>
+
   <h2 class="text-center mt-4">Messages</h2>
 
   <div th:each="msg : ${messages}" class="card">
