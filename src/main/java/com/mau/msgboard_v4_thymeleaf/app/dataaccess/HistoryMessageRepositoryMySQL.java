@@ -41,7 +41,7 @@ public class HistoryMessageRepositoryMySQL implements HistoryMessageRepository {
 
     @Override
     public int save(HistoryMessage historyMessage) {
-        String sql = "INSERT INTO history_message (message_id, content, history_creation_date, update_date) " +
+        String sql = "INSERT INTO History_Message (message_id, content, history_creation_date, update_date) " +
                 "VALUES (?, ?, ?, ?)";
 
         logger.debug("Attempting to save HistoryMessage for messageId: {}", historyMessage.getMessageId());
@@ -71,7 +71,7 @@ public class HistoryMessageRepositoryMySQL implements HistoryMessageRepository {
 
     @Override
     public HistoryMessage findById(int historyMessageId) {
-        String sql = "SELECT * FROM history_message WHERE history_message_id = ?";
+        String sql = "SELECT * FROM History_Message WHERE history_message_id = ?";
 
         logger.debug("Finding HistoryMessage by ID: {}", historyMessageId);
 
@@ -87,7 +87,7 @@ public class HistoryMessageRepositoryMySQL implements HistoryMessageRepository {
 
     @Override
     public List<HistoryMessage> findByMessageId(int messageId) {
-        String sql = "SELECT * FROM history_message WHERE message_id = ? ORDER BY history_creation_date";
+        String sql = "SELECT * FROM History_Message WHERE message_id = ? ORDER BY history_creation_date";
 
         logger.debug("Finding HistoryMessages by messageId: {}", messageId);
 
@@ -104,7 +104,7 @@ public class HistoryMessageRepositoryMySQL implements HistoryMessageRepository {
 
     @Override
     public boolean update(HistoryMessage historyMessage) {
-        String sql = "UPDATE history_message SET message_id = ?, content = ?, " +
+        String sql = "UPDATE History_Message SET message_id = ?, content = ?, " +
                 "history_creation_date = ?, update_date = ? " +
                 "WHERE history_message_id = ?";
 
@@ -137,7 +137,7 @@ public class HistoryMessageRepositoryMySQL implements HistoryMessageRepository {
 
     @Override
     public boolean deleteById(int historyMessageId) {
-        String sql = "DELETE FROM history_message WHERE history_message_id = ?";
+        String sql = "DELETE FROM History_Message WHERE history_message_id = ?";
 
         logger.debug("Deleting HistoryMessage with ID: {}", historyMessageId);
 
