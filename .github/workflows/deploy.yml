@@ -12,6 +12,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      
+
+      # To confirm the host is set correctly
+      - name: Debug Host Connectivity
+        run: |
+              echo "Checking host: ${{ secrets.LIGHTSAIL_HOST }}"
+              ping -c 3 ${{ secrets.LIGHTSAIL_HOST }} || echo "⚠️ Host not reachable"
+
 
       # Debug SSH Key Setup
       - name: Debug SSH Key Setup
