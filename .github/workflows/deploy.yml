@@ -7,10 +7,18 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # This is for the GitHub runner
+    runs-on: ubuntu-latest  # GitHub-hosted runner
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to AWS Lightsail
         uses: appleboy/ssh-action@v0.1.10
@@ -20,9 +28,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             echo "Deploying to Amazon Linux 2..."
-            sudo yum update -y  # Amazon Linux uses `yum`
-            cd /home/ec2-user/github_apps/MsgBoard_App  # Adjust this to your deployment folder
+            sudo yum update -y  # Update system packages (optional)
+            cd /home/ec2-user/github_apps/MsgBoard_App  # Adjust this to your app's folder
             git pull origin main
             mvn clean package
             sudo systemctl restart tomcat  # Adjust based on your app
-            EOF
