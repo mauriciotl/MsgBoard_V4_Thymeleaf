@@ -3,32 +3,37 @@ name: Deploy to AWS Lightsail
 on:
   push:
     branches:
-      - main  # Runs when pushing to main
+      - main  # Runs only when pushing to main branch
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # GitHub-hosted runner
+    runs-on: ubuntu-latest  # GitHub runner
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Debug SSH Key Setup
       - name: Debug SSH Key Setup
         run: |
-              mkdir -p ~/.ssh
-              echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-              chmod 600 ~/.ssh/id_rsa
-              ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
-              cat ~/.ssh/id_rsa  # Debugging: Remove this after testing!
-
-      - name: Setup SSH Key
-        run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          ls -lah ~/.ssh  # Check if the file is created
+          cat ~/.ssh/id_rsa | head -n 5  # Display first 5 lines (remove after testing!)
+
+      # Add SSH Host to Known Hosts
+      - name: Add SSH Host to Known Hosts
+        run: |
           ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to AWS Lightsail
+      # Test SSH Connection
+      - name: Test SSH Connection
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.LIGHTSAIL_HOST }} "echo 'SSH Connection Successful'"
+
+      # Deploy to AWS Lightsail
+      - name: Deploy Application
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.LIGHTSAIL_HOST }}
@@ -36,8 +41,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             echo "Deploying to Amazon Linux 2..."
-            sudo yum update -y  # Update system packages (optional)
-            cd /home/ec2-user/github_apps/MsgBoard_App  # Adjust this to your app's folder
+            sudo yum update -y  # Amazon Linux uses `yum`
+            cd /home/ec2-user/github_apps/MsgBoard_App  # Adjust this to your deployment folder
             git pull origin main
             mvn clean package
             sudo systemctl restart tomcat  # Adjust based on your app
