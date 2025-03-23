@@ -1,0 +1,28 @@
+name: Deploy to AWS Lightsail
+
+on:
+  push:
+    branches:
+      - main  # Runs when pushing to main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # This is for the GitHub runner
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to AWS Lightsail
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ec2-user
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Deploying to Amazon Linux 2..."
+            sudo yum update -y  # Amazon Linux uses `yum`
+            cd /home/ec2-user/github_apps/MsgBoard_App  # Adjust this to your deployment folder
+            git pull origin main
+            mvn clean package
+            sudo systemctl restart tomcat  # Adjust based on your app
+            EOF
