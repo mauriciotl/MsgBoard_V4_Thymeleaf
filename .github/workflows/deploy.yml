@@ -3,69 +3,36 @@ name: Deploy to AWS Lightsail
 on:
   push:
     branches:
-      - main  # Runs only when pushing to main branch
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # GitHub runner
-
+    runs-on: ubuntu-latest  # Keep this as is
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-
-
-      # Debug SSH Key Setup
-      - name: Debug SSH Key Setup
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github_lightsail
-          chmod 600 ~/.ssh/github_lightsail
-          ssh-keygen -yf ~/.ssh/github_lightsail > ~/.ssh/github_lightsail.pub || echo "⚠️ Failed to extract public key"
-          ls -lah ~/.ssh  # Check if the file is created
-
-
-      # verify the SSH key:
-      - name: Check SSH Key
-        run: |
-          ls -lah ~/.ssh
-          cat ~/.ssh/github_lightsail | head -n 5
-
-      - name: Debug SSH Key Format
-        run: |
-          file ~/.ssh/github_lightsail
-          cat ~/.ssh/github_lightsail | head -n 3
-
-
-
-      # Add SSH Host to Known Hosts
-      - name: Add SSH Host to Known Hosts
-        run: |
-          ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
-
-      # Test SSH Connection
-      - name: Test SSH Connection
-        run: |
-          ssh -i ~/.ssh/github_lightsail -o StrictHostKeyChecking=no ec2-user@${{ secrets.LIGHTSAIL_HOST }} "echo '✅ SSH Connection Successful'"
-
-      # before deployment:
-      - name: Test SSH Connection
-        run: |
-          ssh -vvv -i ~/.ssh/github_lightsail -o StrictHostKeyChecking=no ec2-user@${{ secrets.LIGHTSAIL_HOST }} "echo '✅ SSH Connection Successful'"
-
-
-
-      # Deploy to AWS Lightsail
-      - name: Deploy Application
-        uses: appleboy/ssh-action@v0.1.10
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ec2-user
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "🚀 Deploying to Amazon Linux 2..."
-            sudo yum update -y  # Amazon Linux uses `yum`
-            cd /home/ec2-user/github_apps/MsgBoard_App  # Adjust this to your deployment folder
-            git pull origin main
-            mvn clean package
-            sudo systemctl restart tomcat  # Adjust based on your app
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests  # Later test can be activated.
+
+      - name: Deploy to Lightsail
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+          LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          # Use $LIGHTSAIL_USERNAME in the path to make it dynamic
+          scp -i private_key.pem target/*.jar $LIGHTSAIL_USERNAME@$LIGHTSAIL_HOST:/home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/
+          ssh -i private_key.pem $LIGHTSAIL_USERNAME@$LIGHTSAIL_HOST << 'EOF'
+            pkill -f 'java -jar' || true
+            nohup java -jar /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/*.jar > /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/app.log 2>&1 &
+          EOF
+          rm private_key.pem
