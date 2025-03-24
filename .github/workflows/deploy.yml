@@ -13,20 +13,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Debug Host Connectivity
-      - name: Debug Host Connectivity
-        run: |
-          echo "Checking host: ${{ secrets.LIGHTSAIL_HOST }}"
-          ping -c 3 ${{ secrets.LIGHTSAIL_HOST }} || echo "⚠️ Host not reachable"
+
 
       # Debug SSH Key Setup
       - name: Debug SSH Key Setup
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/github_lightsail
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github_lightsail
           chmod 600 ~/.ssh/github_lightsail
+          ssh-keygen -yf ~/.ssh/github_lightsail > ~/.ssh/github_lightsail.pub || echo "⚠️ Failed to extract public key"
           ls -lah ~/.ssh  # Check if the file is created
-          cat ~/.ssh/github_lightsail | head -n 5  # Display first 5 lines (remove after testing!)
+
 
       # verify the SSH key:
       - name: Check SSH Key
