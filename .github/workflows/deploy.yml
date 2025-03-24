@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
 
       # To confirm the host is set correctly
       - name: Debug Host Connectivity
@@ -38,7 +38,7 @@ jobs:
       # Test SSH Connection
       - name: Test SSH Connection
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@${{ secrets.LIGHTSAIL_HOST }} "echo 'SSH Connection Successful'"
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ec2-user@${{ secrets.LIGHTSAIL_HOST }} "echo 'SSH Connection Successful'"
 
       # Deploy to AWS Lightsail
       - name: Deploy Application
