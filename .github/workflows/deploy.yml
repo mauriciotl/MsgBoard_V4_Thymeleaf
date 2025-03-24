@@ -13,19 +13,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-
-      # To confirm the host is set correctly
+      # Debug Host Connectivity
       - name: Debug Host Connectivity
         run: |
-              echo "Checking host: ${{ secrets.LIGHTSAIL_HOST }}"
-              ping -c 3 ${{ secrets.LIGHTSAIL_HOST }} || echo "⚠️ Host not reachable"
-
+          echo "Checking host: ${{ secrets.LIGHTSAIL_HOST }}"
+          ping -c 3 ${{ secrets.LIGHTSAIL_HOST }} || echo "⚠️ Host not reachable"
 
       # Debug SSH Key Setup
       - name: Debug SSH Key Setup
         run: |
           mkdir -p ~/.ssh
-          printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github_lightsail
           chmod 600 ~/.ssh/github_lightsail
           ls -lah ~/.ssh  # Check if the file is created
           cat ~/.ssh/github_lightsail | head -n 5  # Display first 5 lines (remove after testing!)
@@ -38,7 +36,7 @@ jobs:
       # Test SSH Connection
       - name: Test SSH Connection
         run: |
-          ssh -i ~/.ssh/github_lightsail -o StrictHostKeyChecking=no ec2-user@${{ secrets.LIGHTSAIL_HOST }} "echo 'SSH Connection Successful'"
+          ssh -i ~/.ssh/github_lightsail -o StrictHostKeyChecking=no ec2-user@${{ secrets.LIGHTSAIL_HOST }} "echo '✅ SSH Connection Successful'"
 
       # Deploy to AWS Lightsail
       - name: Deploy Application
@@ -48,7 +46,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Deploying to Amazon Linux 2..."
+            echo "🚀 Deploying to Amazon Linux 2..."
             sudo yum update -y  # Amazon Linux uses `yum`
             cd /home/ec2-user/github_apps/MsgBoard_App  # Adjust this to your deployment folder
             git pull origin main
