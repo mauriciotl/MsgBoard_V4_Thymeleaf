@@ -29,10 +29,28 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          # Use $LIGHTSAIL_USERNAME in the path to make it dynamic, disable host key verification
+          # Copy the JAR (assuming it's named something like MsgBoard_App-1.0-SNAPSHOT.jar from Maven)
           scp -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/*.jar $LIGHTSAIL_USERNAME@$LIGHTSAIL_HOST:/home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/
           ssh -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $LIGHTSAIL_USERNAME@$LIGHTSAIL_HOST << 'EOF'
+            echo "Stopping any running Java processes..."
             pkill -f 'java -jar' || true
-            nohup java -jar /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/*.jar > /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/app.log 2>&1 &
+            sleep 2  # Give it a moment to stop
+            echo "Starting the new JAR..."
+            # Replace *.jar with the exact JAR name (adjust based on your Maven output)
+            JAR_FILE=$(ls /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/*.jar | head -n 1)
+            if [ -z "$JAR_FILE" ]; then
+              echo "Error: No JAR file found in /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/"
+              exit 1
+            fi
+            nohup java -jar "$JAR_FILE" > /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/app.log 2>&1 &
+            sleep 2  # Wait for the app to start
+            echo "Checking if the app is running..."
+            if ps aux | grep -v grep | grep "$JAR_FILE" > /dev/null; then
+              echo "App started successfully!"
+            else
+              echo "Error: App failed to start. Check /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/app.log for details:"
+              cat /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/app.log
+              exit 1
+            fi
           EOF
           rm private_key.pem
