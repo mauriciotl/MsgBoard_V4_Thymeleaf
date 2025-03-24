@@ -26,9 +26,9 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_ed25519
           ls -lah ~/.ssh  # Check if the file is created
-          cat ~/.ssh/id_rsa | head -n 5  # Display first 5 lines (remove after testing!)
+          cat ~/.ssh/id_ed25519 | head -n 5  # Display first 5 lines (remove after testing!)
 
       # Add SSH Host to Known Hosts
       - name: Add SSH Host to Known Hosts
