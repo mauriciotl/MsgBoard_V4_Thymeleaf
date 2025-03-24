@@ -29,9 +29,9 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          # Use $LIGHTSAIL_USERNAME in the path to make it dynamic
-          scp -i private_key.pem target/*.jar $LIGHTSAIL_USERNAME@$LIGHTSAIL_HOST:/home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/
-          ssh -i private_key.pem $LIGHTSAIL_USERNAME@$LIGHTSAIL_HOST << 'EOF'
+          # Use $LIGHTSAIL_USERNAME in the path to make it dynamic, disable host key verification
+          scp -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/*.jar $LIGHTSAIL_USERNAME@$LIGHTSAIL_HOST:/home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/
+          ssh -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $LIGHTSAIL_USERNAME@$LIGHTSAIL_HOST << 'EOF'
             pkill -f 'java -jar' || true
             nohup java -jar /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/*.jar > /home/$LIGHTSAIL_USERNAME/github_apps/MsgBoard_App/app.log 2>&1 &
           EOF
