@@ -26,9 +26,9 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/github_lightsail
           ls -lah ~/.ssh  # Check if the file is created
-          cat ~/.ssh/id_ed25519 | head -n 5  # Display first 5 lines (remove after testing!)
+          cat ~/.ssh/github_lightsail | head -n 5  # Display first 5 lines (remove after testing!)
 
       # Add SSH Host to Known Hosts
       - name: Add SSH Host to Known Hosts
@@ -38,7 +38,7 @@ jobs:
       # Test SSH Connection
       - name: Test SSH Connection
         run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ec2-user@${{ secrets.LIGHTSAIL_HOST }} "echo 'SSH Connection Successful'"
+          ssh -i ~/.ssh/github_lightsail -o StrictHostKeyChecking=no ec2-user@${{ secrets.LIGHTSAIL_HOST }} "echo 'SSH Connection Successful'"
 
       # Deploy to AWS Lightsail
       - name: Deploy Application
