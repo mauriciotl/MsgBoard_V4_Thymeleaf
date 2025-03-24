@@ -31,6 +31,12 @@ jobs:
           ls -lah ~/.ssh
           cat ~/.ssh/github_lightsail | head -n 5
 
+      - name: Debug SSH Key Format
+        run: |
+          file ~/.ssh/github_lightsail
+          cat ~/.ssh/github_lightsail | head -n 3
+
+
 
       # Add SSH Host to Known Hosts
       - name: Add SSH Host to Known Hosts
