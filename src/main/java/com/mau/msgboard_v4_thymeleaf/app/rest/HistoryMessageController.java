@@ -1,4 +1,4 @@
-package com.mau.msgboard_v4_thymeleaf.app.controller;
+package com.mau.msgboard_v4_thymeleaf.app.rest;
 
 import com.mau.msgboard_v4_thymeleaf.app.model.HistoryMessage;
 import com.mau.msgboard_v4_thymeleaf.app.service.HistoryMessageService;

@@ -4,7 +4,20 @@
 
 <head>
     <title>Edit Message</title>
-    <link rel="stylesheet" th:href="@{/stylesHistoryMessage.css}"/>
+    <link rel="stylesheet" th:href="@{/styles/stylesHistoryMessage.css}"/>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const contextPath = /*[[${#httpServletRequest.contextPath}]]*/ '';
+        /*]]>*/
+    </script>
+    <script src="/js/history-message.js" th:src="@{/js/history-message.js}"></script>
+    <script>
+        // Initialize the history functionality with the context path
+        initMessageHistory(contextPath);
+    </script>
+
+
 </head>
 <body>
 <h1>Edit Message</h1>
@@ -39,71 +52,7 @@
     </table>
 </div>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    // Get context path from Thymeleaf
-    const contextPath = /*[[${#httpServletRequest.contextPath}]]*/ '';
 
-    // Wait for the page to load
-    document.addEventListener('DOMContentLoaded', function() {
-        const showHistoryBtn = document.getElementById('showHistoryBtn');
-        const historyTable = document.getElementById('historyTable');
-        const historyTableBody = document.getElementById('historyTableBody');
-
-        // Add click event to the button
-        showHistoryBtn.addEventListener('click', function() {
-            // Get messageId from the hidden input field
-            const messageId = document.getElementById('messageId').value;
-            const url = contextPath + '/history/messages/' + messageId;
-
-            // Make an AJAX request using fetch
-            fetch(url, {
-                method: 'GET'
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json(); // Parse the JSON response
-                })
-                .then(data => {
-                    // Clear the table body
-                    historyTableBody.innerHTML = '';
-
-                    // Check if there’s data to display
-                    if (data && data.length > 0) {
-                        // Loop through the data and create table rows
-                        data.forEach(message => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                            <td>${message.historyMessageId}</td>
-                            <td>${message.content}</td>
-                            <td>${message.historyCreationDate}</td>
-                            <td>${message.updateDate}</td>
-                        `;
-                            historyTableBody.appendChild(row);
-                        });
-                    } else {
-                        // Show a "no history" message if the array is empty
-                        const row = document.createElement('tr');
-                        row.innerHTML = '<td colspan="4">No history found for this message</td>';
-                        historyTableBody.appendChild(row);
-                    }
-                    // Show the table
-                    historyTable.style.display = 'table';
-                })
-                .catch(error => {
-                    // Handle errors (e.g., network issues or server errors)
-                    historyTableBody.innerHTML = '';
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td colspan="4">Error loading history: ${error.message}</td>`;
-                    historyTableBody.appendChild(row);
-                    historyTable.style.display = 'table';
-                });
-        });
-    });
-    /*]]>*/
-</script>
 <br/>
 <a th:href="@{/messages}">Back to Messages</a>
 
