@@ -13,9 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * Configuration class for Spring Security settings.
- */
 @Configuration
 public class SecurityConfig {
 
@@ -27,10 +24,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10);
     }
 
-    /*
-    The UserDetailsService is designed for loading user details during authentication,
-    not for retrieving the current user in a controller (for example).
-     */
     @Bean
     public UserDetailsService userDetailsService(UserService userService) {
         return username -> {
@@ -53,8 +46,9 @@ public class SecurityConfig {
         logger.info("Configuring SecurityFilterChain");
         return http
                 .authorizeRequests()
-                .mvcMatchers("/messages", "/history").hasRole("USER")
-                .anyRequest().permitAll()
+                .mvcMatchers("/login", "/logout").permitAll() // Public endpoints
+                .mvcMatchers("/css/**", "/js/**", "/images/**").permitAll() // Static resources
+                .anyRequest().authenticated() // Everything else requires authentication
                 .and()
                 .formLogin()
                 .loginPage("/login")
@@ -67,16 +61,17 @@ public class SecurityConfig {
                     logger.info("Login successful for: {}", authentication.getName());
                     response.sendRedirect(request.getContextPath() + "/messages");
                 })
+                .permitAll()
                 .and()
                 .logout()
-                .logoutUrl("/logout") // Default logout endpoint (POST)
-                .logoutSuccessUrl("/") // Redirect after logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/")
                 .addLogoutHandler((request, response, authentication) -> {
                     if (authentication != null) {
                         logger.info("User logged out: {}", authentication.getName());
                     }
                 })
-                .permitAll() // Allow anyone to access logout
+                .permitAll()
                 .and()
                 .headers()
                 .frameOptions()
