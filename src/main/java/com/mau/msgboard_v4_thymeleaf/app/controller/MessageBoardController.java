@@ -1,7 +1,9 @@
 package com.mau.msgboard_v4_thymeleaf.app.controller;
 
 import com.mau.msgboard_v4_thymeleaf.app.model.Message;
+import com.mau.msgboard_v4_thymeleaf.app.model.User;
 import com.mau.msgboard_v4_thymeleaf.app.service.MessageService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,7 +23,8 @@ public class MessageBoardController {
     }
 
     @GetMapping
-    public String showMessageBoard(Model model) {
+    public String showMessageBoard(Model model, @AuthenticationPrincipal User user) {
+        model.addAttribute("user", user);
         model.addAttribute("messages", messageService.getAllMessages());
         return "messageBoard";
     }
@@ -32,11 +35,15 @@ public class MessageBoardController {
     }
 
     @PostMapping("/add")
-    public String addMessage(@Valid @ModelAttribute("message") Message message, BindingResult result, Model model) {
+    public String addMessage(@Valid @ModelAttribute("message") Message message, BindingResult result, Model model,
+                             @AuthenticationPrincipal User user) {
         if (result.hasErrors()) {
             model.addAttribute("messages", messageService.getAllMessages());
+            model.addAttribute("user", user);
             return "messageBoard";
         }
+        model.addAttribute("user", user);
+        message.setUserId(user.getUserId());
         message.setCreationDate(new Timestamp(System.currentTimeMillis()));
         messageService.saveMessage(message);
         return "redirect:/messages";

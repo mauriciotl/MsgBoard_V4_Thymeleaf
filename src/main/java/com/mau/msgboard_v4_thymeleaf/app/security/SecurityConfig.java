@@ -27,6 +27,10 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10);
     }
 
+    /*
+    The UserDetailsService is designed for loading user details during authentication,
+    not for retrieving the current user in a controller (for example).
+     */
     @Bean
     public UserDetailsService userDetailsService(UserService userService) {
         return username -> {

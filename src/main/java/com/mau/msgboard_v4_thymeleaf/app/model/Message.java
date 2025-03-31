@@ -1,8 +1,6 @@
 package com.mau.msgboard_v4_thymeleaf.app.model;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.sql.Timestamp;
 
@@ -10,8 +8,7 @@ public class Message {
 
     private int messageId;
 
-    @NotNull(message = "User ID is required")
-    @Min(value = 1, message = "User ID must be 0 or greater")
+    // Set server-side from auth, no client input; that's why validations are not necessary here.
     private int userId;
 
     @NotBlank(message="Content is required")
