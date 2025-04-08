@@ -46,7 +46,7 @@ public class SecurityConfig {
         logger.info("Configuring SecurityFilterChain");
         return http
                 .authorizeRequests()
-                .mvcMatchers("/login", "/logout").permitAll() // Public endpoints
+                .mvcMatchers("/login", "/logout", "/api/**").permitAll() // Public endpoints
                 .mvcMatchers("/css/**", "/js/**", "/images/**").permitAll() // Static resources
                 .anyRequest().authenticated() // Everything else requires authentication
                 .and()
