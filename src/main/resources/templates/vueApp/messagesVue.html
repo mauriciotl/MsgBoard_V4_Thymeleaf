@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Messages</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Add context path as a global variable -->
+    <script th:inline="javascript">
+        window.contextPath = /*[[${#httpServletRequest.getContextPath()}]]*/ '';
+    </script>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- Vue and Axios CDN -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<!-- Component Files -->
+<script th:src="@{/js/vueApp/MessageForm.js}"></script>
+<script th:src="@{/js/vueApp/MessageList.js}"></script>
+<script th:src="@{/js/vueApp/EditMessageModal.js}"></script>
+<script th:src="@{/js/vueApp/App.js}"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

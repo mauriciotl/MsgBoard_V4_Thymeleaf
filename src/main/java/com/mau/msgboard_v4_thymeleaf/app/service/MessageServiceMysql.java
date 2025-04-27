@@ -9,6 +9,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -23,12 +25,16 @@ public class MessageServiceMysql implements MessageService {
         this.messageDao = messageDao;
     }
 
-
     @Override
     @Transactional
     public int saveMessage(Message message) {
         try {
             logger.info("Saving new message: {}", message);
+            // Set creationDate if null
+            if (message.getCreationDate() == null) {
+                message.setCreationDate(Timestamp.from(Instant.now()));
+                logger.debug("Set creationDate to: {}", message.getCreationDate());
+            }
             return messageDao.save(message);
         } catch (DataAccessException e) {
             logger.error("Database error while saving message: {}", e.getMessage(), e);
@@ -74,6 +80,11 @@ public class MessageServiceMysql implements MessageService {
             logger.info("Updating message with ID: {}", message.getMessageId());
             logger.info("The HistoryMessage object is created by a Trigger on the DB");
             //NOTE. The HistoryMessage object is created by a Trigger on the DB
+            // Set creationDate if null
+            if (message.getCreationDate() == null) {
+                message.setCreationDate(Timestamp.from(Instant.now()));
+                logger.debug("Set creationDate for updateMessage to: {}", message.getCreationDate());
+            }
             return messageDao.update(message);
         } catch (DataAccessException e) {
             logger.error("Database error while updating message with ID {}: {}", message.getMessageId(), e.getMessage(), e);

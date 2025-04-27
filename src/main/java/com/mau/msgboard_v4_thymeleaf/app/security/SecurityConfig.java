@@ -46,8 +46,10 @@ public class SecurityConfig {
         logger.info("Configuring SecurityFilterChain");
         return http
                 .authorizeRequests()
-                .mvcMatchers("/login", "/logout", "/api/**").permitAll() // Public endpoints
+                .mvcMatchers("/login", "/logout", "/register").permitAll() // Public endpoints
                 .mvcMatchers("/css/**", "/js/**", "/images/**").permitAll() // Static resources
+                // Allow all HTTP methods for API endpoints without authentication
+//                .mvcMatchers("/vueMessages","/vueApp/messagesVue","/api/**").permitAll()
                 .anyRequest().authenticated() // Everything else requires authentication
                 .and()
                 .formLogin()
@@ -72,6 +74,10 @@ public class SecurityConfig {
                     }
                 })
                 .permitAll()
+                .and()
+                // Disable CSRF for API endpoints
+                .csrf()
+//                .ignoringAntMatchers("/api/**")
                 .and()
                 .headers()
                 .frameOptions()
